@@ -9,6 +9,7 @@
 #include "V8DataModel/PartInstance.h"
 #include "V8DataModel/Workspace.h"
 #include "V8DataModel/Sky.h"
+#include "V8DataModel/PostEffect.h"
 #include "V8DataModel/ContentProvider.h"
 #include "V8DataModel/MeshContentProvider.h"
 #include "V8DataModel/Camera.h"
@@ -16,9 +17,6 @@
 #include "V8DataModel/RenderHooksService.h"
 #include "V8DataModel/Stats.h"
 #include "v8datamodel/DataModel.h"
-#if defined(ARL_PLATFORM_DURANGO)
-#   include "v8datamodel/PlatformService.h"
-#endif
 #include "v8world/World.h"
 #include "v8datamodel/UserInputService.h"
 
@@ -38,7 +36,6 @@
 #include "GfxBase/FrameRateManager.h"
 #include "util/Profiling.h"
 #include "util/IMetric.h"
-#include "util/RobloxGoogleAnalytics.h"
 
 #include "TextureManager.h"
 #include "AdornRender.h"
@@ -94,7 +91,6 @@ FASTFLAGVARIABLE(RenderThumbModelReflectionsFix,false);
 
 FASTINTVARIABLE(RenderShadowIntensity, 75)
 
-FASTFLAG(UseDynamicTypesetterUTF8)
 FASTFLAG(FramerateVisualizerShow)
 FASTFLAG(TaskSchedulerCyclicExecutive)
 
@@ -400,21 +396,10 @@ RenderView::~RenderView(void)
 {	
 	bindWorkspace(boost::shared_ptr<ARL::DataModel>());
 
-    sendFeatureLevelStats();
-
 #if defined(_WIN32) && !defined(ARL_PLATFORM_DURANGO)
 	timeEndPeriod(1);
 #endif
 	FASTLOG(FLog::ViewRbxInit, "RenderView destroyed");
-}
-
-void RenderView::sendFeatureLevelStats()
-{
-    if (visualEngine.get() && visualEngine.get()->getDevice())
-    {
-        std::string osAndFeatureLvl = SystemUtil::osPlatform() + " " + visualEngine.get()->getDevice()->getFeatureLevel();
-        ARL::RobloxGoogleAnalytics::trackEvent(GA_CATEGORY_GAME, "GraphicsFeatureLevel", osAndFeatureLvl.c_str());
-    }
 }
 
 void RenderView::onResize(int cx, int cy)
@@ -519,6 +504,39 @@ void RenderView::updateLighting(Lighting* lighting)
             lighting->setClearColor(lighting->getSkyParameters().skyAmbient);
         }
 
+		float brightnessIntensity = 0.0f;
+		float contrastIntensity = 0.0f;
+		float saturationIntensity = 0.0f;
+		float blurIntensity = 0.0f;
+		G3D::Color3 tintColorIntensity = G3D::Color3::white();
+
+		// this is fine
+		if (Instance* inst = lighting->findFirstChildOfType("BlurEffect")) {
+
+			// oh my god what am i doing
+			if (BlurEffect* blur = inst->fastDynamicCast<ARL::BlurEffect>()) {
+				if (blur->isEnabled())
+					blurIntensity = (blur->getSize()/56.f)*15.f;
+			}
+		}
+		
+		if (Instance* inst = lighting->findFirstChildOfType("ColorCorrectionEffect")) {
+
+			// oh my god what am i doing
+			if (ColorCorrectionEffect* colorCorrection = inst->fastDynamicCast<ARL::ColorCorrectionEffect>()) {
+				if (colorCorrection->isEnabled()) {
+					brightnessIntensity = colorCorrection->getBrightness();
+					contrastIntensity = colorCorrection->getContrast();
+					saturationIntensity = colorCorrection->getSaturation();
+					tintColorIntensity = colorCorrection->getTintColor();
+				}
+					
+			}
+		}
+
+		// yep
+		smgr->setPostProcess(brightnessIntensity, contrastIntensity, -saturationIntensity, blurIntensity, tintColorIntensity);
+
         // Lighting
         presetLighting(lighting);
 
@@ -527,13 +545,6 @@ void RenderView::updateLighting(Lighting* lighting)
 
     smgr->setSkyEnabled(!lighting->isSkySuppressed());
     smgr->setClearColor(Color4(lighting->getClearColor(), lighting->getClearAlpha()));
-}
-
-static void reportVRUsage(int placeId)
-{
-	std::string placeIdStr = format("%d", placeId);
-
-	RobloxGoogleAnalytics::trackEventWithoutThrottling(GA_CATEGORY_GAME, "VR", placeIdStr.c_str());
 }
 
 void RenderView::updateVR()
@@ -545,13 +556,6 @@ void RenderView::updateVR()
 
     if (DeviceVR* vr = visualEngine->getDevice()->getVR())
 	{
-		// GA
-		if (dataModel && dataModel->getPlaceID())
-		{
-			static boost::once_flag flag = BOOST_ONCE_INIT;
-			boost::call_once(flag, boost::bind(&reportVRUsage, dataModel->getPlaceID()));
-		}
-
 		// Disable throttling for VR (ideally render job should control this...)
 		TaskScheduler::singleton().DataModel30fpsThrottle = false;
 
@@ -1414,8 +1418,7 @@ void RenderView::renderPerformImpl(double timeJobStart, Framebuffer* mainFramebu
     Adorn* adorn = visualEngine->getAdorn();
 
     // update glyph atlas
-    if (FFlag::UseDynamicTypesetterUTF8)
-        visualEngine->getGlyphAtlas()->upload();
+    visualEngine->getGlyphAtlas()->upload();
 
     adorn->prepareRenderPass();
 

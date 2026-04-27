@@ -1349,7 +1349,6 @@ cmd /c "exit /b 0"</Command>
     </ClCompile>
     <ClCompile Include="util\rbxrandom.cpp" />
     <ClCompile Include="util\Region3int32.cpp" />
-    <ClCompile Include="util\RobloxGoogleAnalytics.cpp" />
     <ClCompile Include="util\Analytics.cpp" />
     <ClCompile Include="util\URL.cpp" />
     <ClCompile Include="util\Shared\Http.cpp">
@@ -1562,6 +1561,7 @@ cmd /c "exit /b 0"</Command>
     </ClCompile>
     <ClCompile Include="v8datamodel\PlayerScripts.cpp" />
     <ClCompile Include="v8datamodel\PointsService.cpp" />
+    <ClCompile Include="v8datamodel\PostEffect.cpp" />
     <ClCompile Include="v8datamodel\ReplicatedFirst.cpp" />
     <ClCompile Include="v8datamodel\RobloxReplicatedStorage.cpp" />
     <ClCompile Include="v8datamodel\ScrollingFrame.cpp" />
@@ -4387,7 +4387,6 @@ cmd /c "exit /b 0"</Command>
     <ClInclude Include="include\util\ProgramMemoryChecker.h" />
     <ClInclude Include="include\util\rbxrandom.h" />
     <ClInclude Include="include\util\Region3int32.h" />
-    <ClInclude Include="include\util\RobloxGoogleAnalytics.h" />
     <ClInclude Include="include\util\Analytics.h" />
     <ClInclude Include="include\util\Sound.h" />
     <ClInclude Include="include\util\SoundService.h" />
@@ -4429,6 +4428,7 @@ cmd /c "exit /b 0"</Command>
     <ClInclude Include="include\v8datamodel\PlatformService.h" />
     <ClInclude Include="include\v8datamodel\PlayerScripts.h" />
     <ClInclude Include="include\v8datamodel\PointsService.h" />
+    <ClInclude Include="include\v8datamodel\PostEffect.h" />
     <ClInclude Include="include\v8datamodel\ReplicatedFirst.h" />
     <ClInclude Include="include\v8datamodel\RobloxReplicatedStorage.h" />
     <ClInclude Include="include\v8datamodel\ScrollingFrame.h" />

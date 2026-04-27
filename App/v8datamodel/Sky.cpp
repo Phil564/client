@@ -4,7 +4,6 @@
 
 #include "g3d/gimage.h"
 #include "util/standardout.h"
-#include "Util/RobloxGoogleAnalytics.h"
 #include "v8datamodel/contentprovider.h"
 
 const char* const ARL::sSky = "Sky";
@@ -20,13 +19,6 @@ Reflection::PropDescriptor<Sky, TextureId> Sky::prop_SkyDn("SkyboxDn", category_
 
 Reflection::PropDescriptor<Sky, int> Sky::prop_StarCount("StarCount", category_Appearance, &Sky::getNumStars, &Sky::setNumStars);
 Reflection::BoundProp<bool> Sky::prop_CelestialBodiesShown("CelestialBodiesShown", category_Appearance, &Sky::drawCelestialBodies);
-
-static void sendSkyBoxStats(const TextureId& texId)
-{
-    std::string idStr = texId.getAssetId();
-    if (!idStr.empty())
-        ARL::RobloxGoogleAnalytics::trackEvent(GA_CATEGORY_GAME, "SkyBox", texId.getAssetId().c_str());
-}
 
 Sky::Sky()
 :drawCelestialBodies(true)
@@ -103,8 +95,5 @@ void Sky::setSkyboxFt(const TextureId&  texId)
     {
         skyFt = texId;    
         raisePropertyChanged(prop_SkyFt);
-
-        static boost::once_flag flag = BOOST_ONCE_INIT;
-        boost::call_once(flag, &sendSkyBoxStats, texId);
-    }
+	}
 }

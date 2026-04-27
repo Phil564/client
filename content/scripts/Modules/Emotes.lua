@@ -131,14 +131,14 @@ local function CreateEmotes()
 		background.BackgroundTransparency = 1
 		background.Position = UDim2.new(0,0,0,0)
 		background.Size = UDim2.new(1,0,1,0)
-		background.Image = "rbxasset://textures/ui/Emotes/Wheel/CircleBackground@2x.png"
+		background.Image = "arlasset://textures/ui/Emotes/Wheel/CircleBackground@2x.png"
 		background.Name = "Background"
 		
 		local segments = Instance.new("ImageLabel", whole_frame)
 		segments.BackgroundTransparency = 1
 		segments.Position = UDim2.new(0,0,0,0)
 		segments.Size = UDim2.new(1,0,1,0)
-		segments.Image = "rbxasset://textures/ui/Emotes/Wheel/SegmentedCircle@2x.png"
+		segments.Image = "arlasset://textures/ui/Emotes/Wheel/SegmentedCircle@2x.png"
 		segments.Name = "Segments"
 		segments.ZIndex = 5
 		
@@ -259,7 +259,7 @@ local function CreateEmotes()
 		
 		local gradient = Instance.new("ImageLabel", frame)
 		gradient.BackgroundTransparency = 1
-		gradient.Image = "rbxasset://textures/ui/Emotes/Wheel/SelectedGradient@2x.png"
+		gradient.Image = "arlasset://textures/ui/Emotes/Wheel/SelectedGradient@2x.png"
 		gradient.ZIndex = 2
 		gradient.Position = UDim2.new(0.5,0,0.5,-53)
 		gradient.Size = UDim2.new(0,138,0,106)
@@ -269,8 +269,9 @@ local function CreateEmotes()
 	end
 	
 	function this:CharacterAdded(character)
-		self.EmoteHandler = Player:FindFirstChild("HandleEmote")
+		self.EmoteHandler = character:WaitForChild("HandleEmote") -- what the hell was i even thinking
 		for i, v in ipairs(self.Emotes) do
+			print("registering")
 			self.EmoteHandler:Fire("register", v.id)
 		end
 	end
@@ -292,12 +293,12 @@ local function CreateEmotes()
 				self.slot = self:selectSlot()
 				local newEmote = self.LoadedEmotes[self.slot]
 				if oldEmote and oldEmote ~= newEmote then
-					oldEmote.EmoteFrame.Image = "rbxasset://textures/ui/Emotes/EmoteIcon.png"
+					oldEmote.EmoteFrame.Image = "arlasset://textures/ui/Emotes/EmoteIcon.png"
 				end
 				if self.slot == 0 or (not newEmote) then
 					self.EmoteNameLabel.Text = #self.Emotes > 0 and "" or "You have no emotes!"
 				else
-					newEmote.EmoteFrame.Image = "rbxasset://textures/ui/Emotes/EmoteIconHover.png"
+					newEmote.EmoteFrame.Image = "arlasset://textures/ui/Emotes/EmoteIconHover.png"
 					this.EmoteNameLabel.Text = newEmote.name
 				end
 			end
@@ -334,7 +335,7 @@ local function CreateEmotes()
 	end
 	
 	function this:PlayEmote(id)
-		if self.EmoteHandler and self.EmoteHandler.Parent == Player then
+		if self.EmoteHandler and self.EmoteHandler.Parent == Player.Character then
 			self.EmoteHandler:Fire("play", id)
 			this:ToggleVisibility()
 		end
@@ -355,7 +356,7 @@ local function CreateEmotes()
 		
 		if GameSettings:IsAeroEnabled() then
 			local sound = Instance.new("Sound", game.CoreGui)
-			sound.SoundId = "rbxasset://sounds/aero/menu_command.mp3"
+			sound.SoundId = "arlasset://sounds/aero/menu_command.mp3"
 			sound.Volume = 5
 			sound.Ended:connect(function()
 				sound:Remove()

@@ -68,7 +68,6 @@
 #include "RobloxTreeWidget.h"
 #include "CommonInsertWidget.h"
 
-#include "Util/RobloxGoogleAnalytics.h"
 #include "RobloxDocManager.h"
 #include "RobloxIDEDoc.h"
 
@@ -1114,7 +1113,7 @@ void RobloxView::setCursorImage(bool forceShowCursor)
 	m_pQtWrapperWidget->unsetCursor();
 
 	// If we want the default cursor just set with Qt arrow cursor...
-	if (!cursorContent.toString().compare("rbxasset://" + defaultMouseCursorPath))
+	if (!cursorContent.toString().compare("arlasset://" + defaultMouseCursorPath))
 	{
 		setDefaultCursorImage();
 		cursorIsSet = true;

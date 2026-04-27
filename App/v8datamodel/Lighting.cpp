@@ -2,13 +2,7 @@
 
 #include "v8datamodel/lighting.h"
 #include "v8datamodel/sky.h"
-
-#include "Util/RobloxGoogleAnalytics.h"
-
-static void sendLightingShadowsStats()
-{
-	ARL::RobloxGoogleAnalytics::trackEvent(GA_CATEGORY_GAME, "LightingShadows");
-}
+#include "v8datamodel/PostEffect.h"
 
 using namespace ARL;
 
@@ -147,7 +141,7 @@ void Lighting::setGeographicLatitude(float value)
 
 bool Lighting::askAddChild(const Instance* instance) const
 {
-	return Instance::fastDynamicCast<Sky>(instance)!=0;
+	return Instance::fastDynamicCast<Sky>(instance)!=0||Instance::fastDynamicCast<PostEffect>(instance)!=0;
 }
 
 void Lighting::fireLightingChanged(bool skyboxChanged)
@@ -227,12 +221,6 @@ void Lighting::setGlobalShadows(bool value)
 	{
 		globalShadows = value;
 		this->raisePropertyChanged(desc_GlobalShadows);
-
-        if (value)
-        {
-			static boost::once_flag flag = BOOST_ONCE_INIT;
-			boost::call_once(&sendLightingShadowsStats, flag);
-        }
 	}
 }
 
@@ -253,6 +241,10 @@ void Lighting::onChildRemoving(Instance* child)
 		sky.reset();
 		fireLightingChanged(true);
 	}
+
+	if (Instance::fastDynamicCast<PostEffect>(child))
+		fireLightingChanged(true);
+
 	Super::onChildRemoving(child);
 }
 
@@ -264,11 +256,17 @@ void Lighting::onChildAdded(Instance* child)
 		this->sky = shared_from(sky);
 		fireLightingChanged(true);
 	}
+
+	if (Instance::fastDynamicCast<PostEffect>(child))
+		fireLightingChanged(true);
 }
 
 void Lighting::onChildChanged(Instance* instance, const PropertyChanged& event)
 {
 	Super::onChildChanged(instance, event);
 	if (sky.get()==instance)
+		fireLightingChanged(true);
+
+	if (instance->fastDynamicCast<PostEffect>()) 
 		fireLightingChanged(true);
 }
