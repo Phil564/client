@@ -247,7 +247,7 @@ local function CreateEmotes()
 	end
 	
 	function this:CharacterAdded(character)
-		self.EmoteHandler = Figure:WaitForChild("HandleEmote") -- what the hell was i even thinking
+		self.EmoteHandler = character:WaitForChild("HandleEmote") -- what the hell was i even thinking
 		for i, v in ipairs(self.Emotes) do
 			self.EmoteHandler:Fire("register", v.id)
 		end
